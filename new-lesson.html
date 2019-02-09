@@ -1,0 +1,104 @@
+<div class="container mb-3">
+    <form id="lessonForm">
+        <div class="alert hide"></div>
+        <h1 class="card-title">Create New Lesson</h1>
+        <div class="form-row my-3">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Course title</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="Course Title" name="lesson-title">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon0">Course Code</span>
+                    </div>
+                    <input type="text" class="form-control" name="course_code" placeholder="Course Code">
+                </div>
+            </div>
+        </div>
+        <div class="form-row my-3">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon2">Lecturer</span>
+                    </div>
+                    <input type="text" class="form-control" name="lecturer" placeholder="Lecturer">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon4">Venue</span>
+                    </div>
+                    <input class="form-control" name="venue" id="venue">
+                </div>
+            </div>
+        </div>
+        <div class="form-row my-3">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon21">Day</span>
+                    </div>
+                    <select name="day" class="custom-select" id="day">
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Starts at</span>
+                    </div>
+                    <input type="time" name="start" class="form-control" id="start">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Ends at</span>
+                    </div>
+                   <input type="time" id="end" name="end" class="form-control">
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary float-right mb-3" id="submitBtn" type="submit">Submit</button>
+    </form>
+</div>
+<script>
+$(function(){
+    $("#lessonForm").submit(function(e){
+        $.ajax({
+            url: "save.php",
+            type: "POST",
+            dataType: "text",
+            data: $(this).serialize(),
+            success: function(responseText){
+                console.log(responseText)
+                if(responseText == "Lesson has been added"){
+                    inputs = $("input");
+                    $(".alert").removeClass("hide").addClass("alert-success").html(responseText)
+                    inputs.each(function(){
+                        $(this).val("")
+                    })
+                }else{
+                    $(".alert").removeClass("hide").addClass("alert-info").html(responseText)
+                }                
+            },
+            fail: function(error){
+                console.log(error)
+                $(".alert").removeClass("hide").addClass("alert-danger").html(error)
+            }
+        });
+        e.preventDefault();
+    });
+})
+</script>

@@ -10,9 +10,127 @@ function is_okay($var){
     return FALSE;
 }
 
+function are_null(...$items){
+    foreach($items as $item){
+        if(is_null($item) || is_empty($item)){
+            return true;
+        }
+    }
+    return false;
+}
+
+function are_not_null(...$items){
+    foreach($items as $item){
+        if(!is_null($item) || !is_empty($item)){
+            $truthy[] = true;
+        }
+        if($truthy){
+            return true;
+        }
+    }
+    return false;
+}
+
+function is_first(...$items){
+    if((!is_null($items[0]) || !empty($items[0])) && is_null($items[1])){
+        return true;
+    }
+    return false;
+}
+
+function is_second(...$items){
+    $first = $items[0];
+    $second = $items[1];
+    if((!is_null($second) || !empty($second)) && is_null($first)){
+        return true;
+    }
+    return false;
+}
+
+function is_third(...$items){
+    $first = $items[0];
+    $second = $items[1];
+    $third = $items[2];
+    if((!is_null($third) || !empty($third)) && is_null($first) && is_null($second)){
+        return true;
+    }
+    return false;
+}
+
+function create_comment_form($id, $type, $user){
+  $form = <<<HEL
+    <button class='btn btn-default btn-sm mb-1 mt-2 ml-3' id='comment-btn'>
+      Add comment
+    </button>
+    <form>
+      <div class='hide ml-3' id='comment-content'>
+        <span class='error'></span>
+        <textarea name='comment' id='comm' class='mb-1 form-control'></textarea>
+        <input type='hidden' name='type' id='type' value='$type'>
+        <input type='hidden' name='type_id' id='type_id' value='$id'>
+        <input type='hidden' name='username' id='user' value='$user'>
+        <button type='submit' id='sm-btn' class='btn btn-sm' disabled>
+          Add
+        </button>
+      </div>
+    </form id='comment-form'>
+    <script>
+      $('#comment-btn').on('click', function(){
+        $(this).hide();
+        $('#comment-content').removeClass('hide');
+      });
+
+      $('textarea').on('keyup', function(){
+        if($(this).val().length > 0){
+          $('#sm-btn').removeAttr('disabled');
+          $('#sm-btn').addClass('btn-primary');
+        }else{
+          $('#sm-btn').attr('disabled','disabled');
+          $('#sm-btn').removeClass('btn-primary');
+        }
+      });
+      user = $('#user').val();
+      typ = $('#type').val();
+      id = $('#type_id').val();
+
+      $('#sm-btn').on('click',function(e){
+        com = $('#comm').val();
+        e.preventDefault();
+        if($("textarea").val() !== ''){
+          $.ajax({
+              method: "POST",
+              url: "../process.php",
+              data: { type: typ, type_id: id, comment: com, username: user }
+            })
+            .done(function(msg) {
+                if(msg == "Comment has been added"){
+                  document.location.reload()
+                }
+            })
+            .fail(function(error){
+                console.log("Error occured: " + error)
+            });
+        }else{
+            $(".error").css("color", "red").text("Please enter your comment!");
+        }
+
+      })
+
+    </script>
+HEL;
+return $form;
+}
+
 function is_post($var){
     if(isset($_POST[$var]) && !empty($_POST[$var])){
         return TRUE;
+    }
+    return FALSE;
+}
+
+function is_get($var){
+    if(isset($_GET[$var]) && !empty($_GET[$var])){
+        return strip_tags($_GET[$var]);
     }
     return FALSE;
 }
@@ -25,6 +143,18 @@ function is_array_okay(...$vars){
 
         return FALSE;
     }
+}
+
+function add_answer($qtn, $content, $user, $time, $date){
+    $conn = get_connection_handle();
+    $stmt = $conn->prepare("insert into answers(question,answer,answered_by,
+      added_on, added_at) values(?,?,?,?,?)");
+    $stmt->bind_param("sssss", $qtn, $content, $user, $time, $date);
+    $stmt->execute();
+    if($conn->affected_rows == 1){
+      return true;
+    }
+    return false;
 }
 
 function is_empty($var){

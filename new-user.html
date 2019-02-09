@@ -1,0 +1,142 @@
+<div class="container mb-3">
+    <div class="alert hide"></div>
+    <label style="font-weight:bold;margin-right:12px;">
+        Select user type
+    </label>
+    <div class="input-group">
+        <div class="custom-control custom-control-inline">
+            <input type="radio" id="admin" name="type" class="custom-control-input" value="Admin">
+            <label class="custom-control-label" for="admin">Admin</label>
+        </div>
+        <div class="custom-control custom-control-inline">
+            <input type="radio" id="normalUser" name="type" 
+            class="custom-control-input" value="User">
+            <label class="custom-control-label" for="normalUser">Normal User</label>
+        </div>
+    </div>
+    <form id="signup" enctype="multipart/form-data" class="hide">
+        <hr>
+        <label for="firstname">Type of user</label><br>
+        <select id="userType" class="custom-select" name="userType">
+            <option value="Student">Student</option>
+            <option value="Tutor">Lecturer</option>
+        </select><br><br>
+        <div class="form-row mb-3">
+            <div class="col">
+                <label for="firstname">Firstname</label><br>
+                <input type="text" name="firstname" maxlength="50" class="input-text" id="firstname"><br>
+            </div>
+            <div class="col">
+                <label for="middlename">Middle name</label><br>
+                <input type="text" name="middlename" class="input-text" id="middlename" placeholder="Optional">
+            </div>
+            <div class="col">
+                <label for="lastname">Lastname</label>
+                <input type="text" name="lastname" maxlength="50" class="input-text" id="lastname">
+            </div>
+        </div>
+        <div class="form-row mb-3">
+            <div class="col">
+                <label for="username">Username</label><br>
+                <input type="text" name="username" class="input-text" id="username"><br>
+            </div>
+            <div class="col">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" class="input-text">
+            </div>
+            <div class="col hide" id="user_place">
+                <label for="user_id">User ID</label><br>
+                <input type="text" name="user_id" class="input-text" id="user_id"><br>
+            </div>
+        </div>
+        <div class="form-row mb-3">
+            <div class="col">
+                <label for="phone">Phone</label>
+                <input type="text" name="phone" id="phone" class="input-text">
+            </div>
+            <div class="col">
+                <label for="password">Password</label>
+                <input type="password" name="password" class="input-text" id="password">
+            </div>
+        </div>
+        <div class="form-row mb-3 hide" id="other">
+            <div class="col" id="prog-type">
+                <label for="programme">Programme</label>
+                <input type="text" name="programme" id="programme" class="input-text">
+            </div>
+            <div class="col hide" id="cert-type">
+                <label for="certitficate">Highest Certification</label>
+                <input name="certificate" id="certificate" class="input-text">
+            </div>
+            <div class="col">
+                <label for="department">Department</label>
+                <input type="text" name="department" class="input-text" id="department">
+            </div>
+        </div>
+        <button class="btn btn-primary" id="btn-submit" type="submit">Signup</button>
+    </form>
+</div>
+<script>
+$("#signup").submit(function(e){
+    e.preventDefault();
+    if($("#admin").is("input:checked")){
+        $.ajax({
+            url: "process.php",
+            type: "POST",
+            dataType: "text",
+            data: $("#signup").serialize(),
+            success: function(response){
+                if(response == "User has been created"){
+                    $("#btn-submit").html("<i class='fa fa-spinner fa-spin'></i>");
+                    $(".alert").removeClass("hide").addClass("alert-success").html(response)
+                }else{
+                    $(".alert").removeClass("hide").addClass("alert-info").html(response)
+                }
+            },
+            fail: function(error){
+                $(".alert").removeClass("hide").addClass("alert-danger").html(error)
+            }
+        })
+    }else{
+        $.ajax({
+            url: "signup.process.php",
+            type: "POST",
+            dataType: "text",
+            data: $("#signup").serialize(),
+            success: function(response){
+                if(response == "User has been created"){
+                    $("#btn-submit").html("<i class='fa fa-spinner fa-spin'></i>");
+                    $(".alert").removeClass("hide").addClass("alert-success").html(response)
+                }else{
+                    $(".alert").removeClass("hide").addClass("alert-info").html(response)
+                }
+            },
+            fail: function(error){
+                console.log(error)
+                $(".alert").removeClass("hide").addClass("alert-danger").html(error)
+            }
+        })
+    }
+})
+radio = $("input:radio");
+radio.on("input click", function(){
+    if(this.id == "normalUser"){
+        $("#signup").removeClass("hide").fadeIn();
+        $("#other").removeClass("hide")
+        $("#user_place").removeClass("hide")
+    }else{
+        $("#signup").removeClass("hide").fadeIn()
+        $("#other").addClass("hide")
+        $("#user_place").addClass("hide")
+    }
+});
+$("#userType").on("input", function(){
+    if($("#userType").val() == "Tutor"){
+        $("#prog-type").addClass("hide");
+        $("#cert-type").removeClass("hide")
+    }else{
+        $("#prog-type").removeClass("hide");
+        $("#cert-type").addClass("hide")
+    }
+})
+</script>

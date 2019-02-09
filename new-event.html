@@ -1,0 +1,143 @@
+<div class="container">
+    <form id="eventForm">
+        <div class="alert hide"></div>
+        <h1 class="card-title">New event</h1>
+        <div class="form-row my-3">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Event title</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="Title" name="title">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon0">Organizer</span>
+                    </div>
+                    <input type="text" class="form-control" name="organizer" placeholder="Organizer">
+                </div>
+            </div>
+        </div>
+        <div class="form-row my-3">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon2">Phone no.</span>
+                    </div>
+                    <input type="tel" class="form-control" name="phone" placeholder="Phone">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">Location</span>
+                    </div>
+                    <input type="text" class="form-control" name="location" placeholder="Location" id="location">
+                </div>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon4">Event type</span>
+            </div>
+            <select id="type" class="custom-select" name="type">
+                <option value="Seminar">Seminar</option>
+                <option value="Sympossium">Sympossium</option>
+                <option value="Conference">Conference</option>
+                <option value="Festivity">Festivity</option>
+                <option value="Organized Lecture">Organizer Lecture</option>
+                <option value="Hand Over">Handing Over</option>
+                <option value="Durbar">Durbar</option>
+                <option value="Sports">Sports</option>
+            </select>
+        </div>
+        <div class="form-row my-3">
+            <div class="col">
+                <label for="description">Description</label>
+                <textarea class="form-control" placeholder="Description" 
+                name="description" id="description"></textarea> 
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon21">Start</span>
+                    </div>
+                    <input type="date" name="start_date" class="form-control" id="start">
+                </div>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">End</span>
+                    </div>
+                    <input type="date" name="end_date" class="form-control" id="end">
+                </div>
+            </div>
+        </div>
+        <div class="form-row my-3">
+            <div class="col">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Time</span>
+                    </div>
+                    <input type="time" name="time" class="form-control" id="end">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Miscelaneous</span>
+                    </div>
+                    <input type="text" class="form-control" name="misc" placeholder="Miscelaneous" id="misc">
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary" id="btnSubmit" type="submit">Save</button>
+    </form><br>
+    <div id="event-div" class="hide my-2">
+        <div class="alert hide" id="alert"></div>
+        <form id="uploadEvent" class="dropzone my-3">
+            <input type="hidden" name="title" id="event-title"><br>
+            <button type="submit" class="btn btn-info mt-3" id="submitPhoto">Upload</button>
+        </form>
+    </div>
+</div>
+<script>
+$(function(){
+    $("#eventForm").submit(function(e){
+        $.ajax({
+            url: "save.php",
+            type: "POST",
+            dataType: "text",
+            data: $(this).serialize(),
+            success: function(responseText){
+                try{
+                    json = JSON.parse(responseText);
+                    if(json.message == "Event successfully added"){
+                        inputs = $("input");
+                        $("textarea").text("")
+                        inputs.each(function(){
+                            $(this).val("")
+                        })
+                        $("#event-title").val(json.title);
+                        $("#eventForm").hide();
+                        $(".alert").removeClass("hide").addClass("alert-success").html(
+                            json.message + ". Add event image now")
+                        $("#event-div").removeClass("hide")
+                    }else{
+                        $(".alert").removeClass("hide").addClass("alert-danger").html(json.message)
+                    }  
+                } catch(e){
+                    $(".alert").removeClass("hide").addClass("alert-danger").html(responseText);
+                }
+                              
+            },
+            fail: function(error){
+                console.log(error)
+                $(".alert").removeClass("hide").addClass("alert-danger").html(error)
+            }
+        });
+        e.preventDefault();
+    });
+})
+</script>

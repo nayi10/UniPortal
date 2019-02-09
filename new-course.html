@@ -1,0 +1,125 @@
+<div class="container">
+    <form id="courseForm">
+        <div class="alert hide"></div>
+        <h1 class="card-title">New Course</h1>
+        <div class="form-row my-3">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Course title</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="Course Title" name="title">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon0">Course Code</span>
+                    </div>
+                    <input type="text" class="form-control" name="course_code" placeholder="Course Code">
+                </div>
+            </div>
+        </div>
+        <div class="form-row my-3">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon2">Lecturer</span>
+                    </div>
+                    <input type="text" class="form-control" name="lecturer" placeholder="Lecturer">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon4">Department</span>
+                    </div>
+                    <input id="type" class="form-control" name="department" id="department">
+                </div>
+            </div>
+        </div>
+        <div class="form-row my-3">
+            <div class="col">
+                <textarea class="form-control" placeholder="Description" 
+                name="description" id="description"></textarea> 
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon21">Status</span>
+                    </div>
+                    <select name="status" class="custom-select" id="status">
+                        <option value="core">Core</option>
+                        <option value="elective">Elective</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Academic year</span>
+                    </div>
+                    <input type="text" name="academic_year" class="form-control" id="academic_year">
+                </div>
+            </div>
+        </div>
+        <div class="form-row my-3">
+            <div class="col">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Level</span>
+                    </div>
+                    <select name="level" class="custom-select" id="level">
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="300">300</option>
+                        <option value="400">400</option>
+                        <option value="500">500</option>
+                        <option value="600">600</option>
+                        <option value="700">700</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Trimester</span>
+                    </div>
+                    <select class="custom-select" name="trimester" id="trimester">
+                        <option value="First">First</option>
+                        <option value="Second">Second</option>
+                        <option value="Third">Third</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary" id="btnSubmit" type="submit">Submit</button>
+    </form>
+</div>
+<script>
+$(function(){
+    $("#courseForm").submit(function(e){
+        $.ajax({
+            url: "save.php",
+            type: "POST",
+            dataType: "text",
+            data: $(this).serialize(),
+            success: function(responseText){
+                if(responseText == "Course has been added."){
+                    inputs = $("input");
+                    $("textarea").text("")
+                    inputs.each(function(){
+                        $(this).val("")
+                    })
+                    $(".alert").removeClass("hide").addClass("alert-success").html(responseText)
+                }else{
+                    $(".alert").removeClass("hide").addClass("alert-info").html(responseText)
+                }                
+            },
+            fail: function(error){
+                console.log(error)
+                $(".alert").removeClass("hide").addClass("alert-danger").html(error)
+            }
+        });
+        e.preventDefault();
+    });
+})
+</script>

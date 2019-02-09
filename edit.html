@@ -1,0 +1,64 @@
+<div class="card">
+    <form id="editForm">
+        <div class="input-group my-3 mx-4">
+            <label for="item" class="input-group-prepend">
+                <span class="input-group-text">Select an item</span>
+            </label>
+            <select name="item" id="item" class="custom-select" style="max-width:75%;">
+                <option value="Events">Event</option>
+                <option value="Courses">Course</option>
+                <option value="Hostels">Hostel</option>
+                <option value="Lessons">Lesson</option>
+            </select>
+            <button id="submitBtn" class="input-group-append">
+                <span class="input-group-text">Load</span>
+            </button>
+        </div>
+        <input class="form-control hide ml-4 mx-2" name="search" id="search" 
+        style="max-width:95%;" placeholder="Search">
+    </form>
+    <div id="holder" class="container ml-2 my-2" style="max-width:98%;"></div>
+</div>
+<script>
+$("#item, #search").on("input", function(){
+    if($("#item").val() !== ""){
+        $.ajax({
+            url: "data.php",
+            type: "POST",
+            dataType: "text",
+            data: {item: $("#item").val(), search: $("#search").val()},
+            success: function(response){
+                $("#search").removeClass("hide").fadeIn();
+                $("#holder").html(response);
+            },
+            fail: function(error){
+                console.log(error);
+            }
+        })
+    }else{
+        $("#holder").addClass("alert alert-warning").html("Please choose an item!");
+    }
+})
+
+$("#submitBtn").click(function(e){
+    e.preventDefault()
+    if($("#item").val() !== ""){
+        $.ajax({
+            url: "data.php",
+            type: "POST",
+            dataType: "text",
+            data: {item: $("#item").val(), search: $("#search").val()},
+            success: function(response){
+                $("#search").removeClass("hide").fadeIn();
+                $("#holder").html(response);
+            },
+            fail: function(error){
+                console.log(error);
+            }
+        })
+    }else{
+        $("#holder").addClass("alert alert-warning").html("Please choose an item!");
+    }
+})
+
+</script>

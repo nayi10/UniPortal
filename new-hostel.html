@@ -1,0 +1,137 @@
+<div class="container mb-3">
+    <form id="hostelForm">
+        <div class="alert hide"></div>
+        <h1 class="card-title">New Course</h1>
+        <div class="form-row my-3">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Hostel name</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="Hostel name" name="hostel-name">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon0">Campus</span>
+                    </div>
+                    <input type="text" class="form-control" name="campus" placeholder="Campus">
+                </div>
+            </div>
+        </div>
+        <div class="form-row my-3">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon2">Contact</span>
+                    </div>
+                    <input type="text" class="form-control" name="phone" placeholder="Contact">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon4">Distance</span>
+                    </div>
+                    <input type="number" min="1" max="1000" class="form-control" name="distance" id="distance">
+                </div>
+            </div>
+        </div>
+        <div class="form-row my-3">
+            <div class="col">
+                <textarea class="form-control" placeholder="Description" 
+                name="description" id="description"></textarea> 
+            </div>
+            <div class="col">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Rent Rate/yr</span>
+                    </div>
+                    <input type="number" name="rate" class="form-control" id="rate">
+                </div>
+            </div>
+        </div>
+        <div class="form-row mt-4">
+            <div class="input-group">
+                <label aria-labelledby="Facilities" style="font-weight:bold;margin-right:8px;">
+                    Facilities:
+                </label>
+                <div class="custom-control custom-control-inline">
+                    <input type="checkbox" id="fa-toilet" name="fa-toilet" 
+                    class="custom-control-input" value="Toilet">
+                    <label class="custom-control-label" for="fa-toilet">Toilet</label>
+                </div>
+                <div class="custom-control custom-control-inline">
+                    <input type="checkbox" id="fa-electricity" name="fa-electricity" 
+                    class="custom-control-input" value="Electricity">
+                    <label class="custom-control-label" for="fa-electricity">Electricity</label>
+                </div>
+                <div class="custom-control custom-control-inline">
+                    <input type="checkbox" id="fa-washroom" name="fa-washroom" 
+                    class="custom-control-input" value="Washroom">
+                    <label class="custom-control-label" for="fa-washroom">Washroom</label>
+                </div>
+                <div class="custom-control custom-control-inline">
+                    <input type="checkbox" id="fa-JCR" name="fa-JCR" 
+                    class="custom-control-input" value="JCR">
+                    <label class="custom-control-label" for="fa-JCR">JCR</label>
+                </div>
+                <div class="custom-control custom-control-inline">
+                    <input type="checkbox" id="fa-tv" name="fa-tv" 
+                    class="custom-control-input" value="Digital TV">
+                    <label class="custom-control-label" for="fa-tv">Digital TV Set</label>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary float-right" id="btnSubmit" type="submit">Submit</button>
+        <br><br>
+    </form>
+    <div id="photo-div" class="hide mt-2 mb-5">
+        <div class="alert hide"></div>
+            <form id="hostel-pic" class="dropzone my-3">
+                <input type="hidden" name="name" id="name"><br>
+                <button class="btn btn-info" style="position:absolute;top:99%;" id="submitPic">Upload</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+$(function(){
+    $("#hostelForm").submit(function(e){
+        $.ajax({
+            url: "save.php",
+            type: "POST",
+            dataType: "text",
+            data: $(this).serialize(),
+            success: function(responseText){
+                try{
+                    json = JSON.parse(responseText);
+                    if(json.message == "Hostel has been added"){
+                        inputs = $("input");
+                        $("textarea").text("")
+                        inputs.each(function(){
+                            $(this).val("")
+                        })
+                        $("#name").val(json.name);
+                        $("#hostelForm").fadeOut("slow", function(){
+                            $("#photo-div").removeClass("hide").fadeIn();
+                        })
+                        $(".alert").removeClass("hide").addClass("alert-success").html(json.message)
+                    }else{
+                        $(".alert").removeClass("hide").addClass("alert-danger").html(json.message)
+                    }    
+                } catch(e){
+                    $(".alert").removeClass("hide").addClass("alert-danger").html(responseText);
+                }
+                            
+            },
+            fail: function(error){
+                console.log(error)
+                $(".alert").removeClass("hide").addClass("alert-danger").html(error)
+            }
+        });
+        e.preventDefault();
+    });
+})
+</script>

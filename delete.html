@@ -1,0 +1,65 @@
+<div class="card">
+    <form id="deleteForm">
+        <div class="input-group my-3 mx-4">
+            <label for="item" class="input-group-prepend">
+                <span class="input-group-text">Select an item</span>
+            </label>
+            <select name="item-to-delete" id="item-to-delete" class="custom-select" style="max-width:75%;">
+                <option value="Events">Event</option>
+                <option value="Courses">Course</option>
+                <option value="Hostels">Hostel</option>
+                <option value="Lessons">Lesson</option>
+                <option value="Users">User</option>
+            </select>
+            <button id="btnLoad" class="input-group-append">
+                <span class="input-group-text">Load</span>
+            </button>
+        </div><br>
+        <input class="form-control hide w-75 ml-3" name="lookup" id="searche" placeholder="Search">
+        <hr>
+    </form><br>
+    <div id="hold" class="container"></div>
+</div>
+<script>
+$("#item-to-delete, #searche").on("input", function(){
+    if($("#item-to-delete").val() !== ""){
+        $.ajax({
+            url: "delete.php",
+            type: "POST",
+            dataType: "text",
+            data: $("#deleteForm").serialize(),
+            success: function(responseText){
+                console.log(responseText)
+                $("#searche").removeClass("hide").fadeIn();
+                $("#hold").html(responseText);
+            },
+            fail: function(error){
+                console.log(error);
+            }
+        })
+    }else{
+        $("#hold").addClass("alert alert-warning").html("Please choose an item!");
+    }
+})
+
+$("#btnLoad").on("click", function(e){
+    e.preventDefault();
+    if($("#item-to-delete").val() !== ""){
+        $.ajax({
+            url: "delete.php",
+            type: "POST",
+            dataType: "text",
+            data: $("#deleteForm").serialize(),
+            success: function(responseText){
+                $("#searche").removeClass("hide").fadeIn();
+                $("#hold").html(responseText);
+            },
+            fail: function(error){
+                $("#hold").html(error);
+            }
+        })
+    }else{
+        $("#hold").addClass("alert alert-warning").html("Please choose an item!");
+    }
+})
+</script>

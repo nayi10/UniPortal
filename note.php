@@ -1,10 +1,16 @@
 <?php
 include_once 'header.php';
+if(is_session("user_id")){
+    $user_id = $_SESSION['user_id'];
+    $email = $_SESSION['email'];
+    $username = $_SESSION['username'];
+    $id = $_SESSION['id'];
+}else{
+    header("/UniPortal");
+}
 
 if(isset($_POST["submit"])){
-    $con = new Connection();
-    $conn = $con->connect();
-
+    $conn = get_connection_handle();
     $errors = array();
 
      if(is_post("title")){
@@ -19,61 +25,42 @@ if(isset($_POST["submit"])){
         $errors[] = "Please note cannot be blank";
     }
 
-
     if(is_post("status")){
         $status = $_POST['status'];
     }
 
     $save_day = date(DATE_RSS);
 
-    if(is_session("student_id")){
-        $owner_id = $_SESSION['student_id'];
+    if(is_session("username")){
+        $owner_id = $_SESSION['username'];
     }
-
-    $result = $conn->query("SELECT id from notes order by id DESC");
-
-    $id = fetch_item($result);
-
-    if($id){
-        $link = "http://localhost/UniPortal/$owner_id/notes.php?id=$id";
-    }else{
-        $id = 1;
-        $link = "http://localhost/UniPortal/$owner_id/notes.php?id=$id";
-    }
+    $link = md5($title);
 
     if(!$errors){
         $stmt = $conn->prepare("insert into notes(title,note,owner_id,"
-                . "created_on,status,link) values(?,?,?,?,?,?)");
+                . "created_on,status,link_id) values(?,?,?,?,?,?)");
         $stmt->bind_param("ssssss", $title,$note,$owner_id,$save_day,$status,$link);
         $stmt->execute();
         if($conn->affected_rows == 1){
             $msg = "Saved successfully";
-            if(!session_id())
-                session_start ();
-            $_SESSION['msg'] = $msg;
+            echo $msg;
         }else {
             $error = "Could not save data";
-            if(!session_id())
-            session_start ();
-        $_SESSION['error'] = $error;
+            echo $error;
         }
 
     }else {
-
-        if(!session_id())
-            session_start ();
-        $_SESSION['errors'] = $errors;
-
+        foreach($errors as $error){
+            echo $error."<br>";
+        }
     }
 }
-
 ?>
-
 <div class="container-fluid">
     <div class="row">
         <div id="hel"></div>
         <div class="col-md-6 mx-auto">
-            <div class="card-0 mt-4">
+            <div class="mt-4">
                 <?php if(is_session("errors")){
                     echo "<div class='alert alert-danger alert-dismissible'>";
                     foreach($_SESSION['errors'] as $error){
@@ -84,15 +71,14 @@ if(isset($_POST["submit"])){
                 ?>
                 <form action="<?php $_SERVER['PHP_SELF']; ?>" method="post">
                     <label for="title" id="lbl-title"></label>
-                    <input type="text" class="b-down inline" placeholder="Title" name="title" id="title">
-                    <br><br>
+                    <input type="text" class="input-text" placeholder="Title" name="title" id="title">
                     <div id="message"></div>
                     <label for="status">
-                        <input type="checkbox" value="Shareable" name="status" id="status">
-                        Shareable
+                        <input type="checkbox" value="Shareable" name="status" id="status"> Shareable
                     </label>
                     <input class="hide" name='note' id="note-content">
-                    <button name="submit" class="btn btn-info"  id="save"style="margin-left:85%;margin-top:0;">
+                    <button name="submit" class="btn btn-info btn-sm"  id="save"
+                    style="margin-left:85%;">
                         <i class="fa fa-save"></i>
                         Save</button>
                     </div>

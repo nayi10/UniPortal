@@ -7,14 +7,12 @@ include_once 'functions.php';
  * @author Alhassan Kamil
  */
 class Assignment {
-    private $questions, $course, $given_date, $submit_date, $submit_time;
+    private $question, $course, $given_date, $submit_date, $submit_time;
     private $lecturer, $submission_method, $submission_format, $other;
-    private $db_connect;
-    private $id;
     private $table = "assignments";
     
-    public function __construct($db) {
-        $this->db_connect = $db;
+    public function __construct() {
+
     }
 
     function get_assignments(){
@@ -36,9 +34,53 @@ class Assignment {
         }
 
     }
+    public function get_given_date() {
+        return $this->given_date;
+    }
 
-    public function get_questions(){
-        return $this->questions;
+    public function get_lecturer() {
+        return $this->lecturer;
+    }
+
+    public function get_submission_method() {
+        return $this->submission_method;
+    }
+
+    public function get_submission_format() {
+        return $this->submission_format;
+    }
+
+    public function get_other() {
+        return $this->other;
+    }
+
+    public function set_given_date($given_date) {
+        $this->given_date = $given_date;
+        return $this;
+    }
+
+    public function set_lecturer($lecturer) {
+        $this->lecturer = $lecturer;
+        return $this;
+    }
+
+    public function set_submission_method($submission_method) {
+        $this->submission_method = $submission_method;
+        return $this;
+    }
+
+    public function set_submission_format($submission_format) {
+        $this->submission_format = $submission_format;
+        return $this;
+    }
+
+    public function set_other($other) {
+        $this->other = $other;
+        return $this;
+    }
+
+        public function get_question(){
+        return $this->question;
     }
 
     public function get_course(){
@@ -53,8 +95,8 @@ class Assignment {
         return $this->submit_time;
     }
 
-    public function set_questions($questions){
-        $this->questions = [$questions];
+    public function set_questions($question){
+        $this->question = $question;
     }
     function set_course($course){
         $this->course = $course;
@@ -68,18 +110,16 @@ class Assignment {
         $this->submit_time = $time_;
     }
 
-    function create($questions,$course,$given_date,$submit_date,$lecturer){
-        if(is_array_okay($questions,$course,$given_date,$submit_date,$lecturer)){
-            $stmt = $this->db_connect->prepare("INSERT INTO assignments(questions,"
-                    . "course,given_date,submit_date,lecturer) VALUES("
-                    . "?,?,?,?,?)");
-            $stmt->bind_params('sssss',$questions,$course,$given_date,
-                    $submit_date,$lecturer);
-            $stmt->execute();
-
-            $rows = show_affected_rows($stmt);
-            return $rows;
+    function insert(){
+        $stmt = $this->db_connect->prepare("INSERT INTO assignments(question,"
+            . "course,given_date,submit_date,lecturer) VALUES(?,?,?,?,?)");
+        $stmt->bind_params('sssss',$this->question,$this->course,$this->given_date,
+            $this->submit_date,$this->lecturer);
+        $stmt->execute();
+        if($stmt->affected_rows == 0){
+            return $stmt->affected_rows;
         }
+        return false;
     }
 
     function finish_create($time=NULL,$method=NULL, $format=NULL, $other=NULL){

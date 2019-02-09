@@ -1,14 +1,9 @@
 <?php
 include_once('header.php');
-
-if(isset($_SESSION['user_id'])){
-
+if(isset($_SESSION['user_id']) || isset($_SESSION['username'])){
     echo "<script>history.back();</script>";
-
 }
-
 ?>
-
 <h1 class="text-hide">Login to your account</h1>
 
 <div class="container"><br>
@@ -19,12 +14,9 @@ if(isset($_SESSION['user_id'])){
 
             <div class="card-4">
                 <?php
-
-                    if(isset($_POST['login'])){
-
-                        $student = new Student();
-
-                    if($student->login($_POST['student_id'], $_POST['password'])){
+                if(isset($_POST['login'])){
+                    $student = new Student();
+                    if($student->login($_POST['user_id'], $_POST['password'])){
                             echo "<div class='alert alert-info alert-dismissible'>"
                             . "Login successful, redirecting...<span class='close' "
                             ."data-dismiss='alert'>&times;</span></div>";
@@ -46,7 +38,7 @@ if(isset($_SESSION['user_id'])){
                 <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>"id="login">
 
                     <label for="user_id" id="label_user">Student ID</label><br>
-                    <input type="text" name="student_id" maxlength="50" class="input-text" id="student_id"><br>
+                    <input type="text" name="user_id" maxlength="50" class="input-text" id="user_id"><br>
 
                     <label for="password">Password</label><br>
                     <input type="password" name="password" maxlength="50" class="input-text" id="password">

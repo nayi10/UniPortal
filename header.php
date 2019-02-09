@@ -1,25 +1,11 @@
 <?php
-session_start();
+if(!session_id())
+  session_start();
 
 $directory = basename(dirname($_SERVER['PHP_SELF']));
 
 require_once('functions.php');
 include_once("Student.php");
-
- if(is_session("student_id")){
-
-    $student_id = $_SESSION['student_id'];
-
-    $email = $_SESSION['email'];
-
-    $user_id = $_SESSION['id'];
-
-}elseif(is_session("tutor_id")){
-    
-    $tutor_id = $_SESSION['tutor_id'];
-    $email = $_SESSION['email'];
-    $user_id = $_SESSION['id'];
-}
 
 ?>
 <!DOCTYPE html>
@@ -30,7 +16,6 @@ include_once("Student.php");
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="author" content="UniPortal">
-
 <meta name="keywords" content="Ghana, questions, qa, QA, Q&A, school, university,
       courses, books, reading, education, educative,event,events, skills,academic,
       publish, educative content, lectures">
@@ -55,51 +40,33 @@ include_once("Student.php");
   <div class="collapse navbar-collapse" id="navbar-toggle">
 
     <ul class="navbar-nav" id="main-menu">
-        <li class="nav-item with-select">
-            <form class="form-inline hide-md">
-                <select name="campus" title="Select Campus" class="overflowed" id="select_campus">
-                    <option value="General">General</option>
-                    <option value="Navrongo">Navrongo</option>
-                    <option value="Nyankpala">Nyankpala</option>
-                    <option value="Tamale">Tamale</option>
-                    <option value="Wa">Wa</option>
-                </select>
-            </form>
+        <li class="nav-item">
+            <input type="search" name="search" placeholder="Search content" class="nav-form-input">
         </li>
         <li class="nav-item">
-            <input type="search" name="search" placeholder="Search content" class="nav-form-input mr-3">
-
-
+            <a class="nav-link" href="/UniPortal/questions/">Questions</a>
         </li>
-
         <li class="nav-item">
-            <a class="nav-link" href="questions.php">Questions</a>
-
+            <a class="nav-link" href="/UniPortal/hostels.php">Hostels</a>
         </li>
-
         <li class="nav-item">
-            <a class="nav-link" href="hostels.php">Hostels</a>
-
+            <a class="nav-link" href="/UniPortal/events.php">Events</a>
         </li>
-
         <li class="nav-item">
-            <a class="nav-link" href="lectures.php">Lectures</a>
-
+            <a class="nav-link" href="/UniPortal/lectures.php">Lectures</a>
         </li>
 
         <li class="nav-item dropdown">
-
         <?php
+            if(isset($_SESSION['user_id']) && $_SESSION['user_id'] != ''){
 
-            if(isset($_SESSION['username']) && $_SESSION['username'] != ''){
+                $user_id = strtoupper($_SESSION['user_id']);
 
-                $username = $_SESSION['username'];
-
-                $user_dir = "users/myaccount/images/".$username.".jpg";
+                $user_dir = "users/myaccount/images/".$user_id.".jpg";
 
                 if(file_exists($user_dir)){
 
-                    echo'<a class="nav-link dropdown-toggle" title="'.$username.'" href="#" id="dropdown"
+                    echo'<a class="nav-link dropdown-toggle" title="'.$user_id.'" href="#" id="dropdown"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <img src="'.$user_dir.'" class="img-circle"></a>
                     <ul class="dropdown-menu" aria-labelledby="dropdown">
@@ -111,24 +78,24 @@ include_once("Student.php");
                         <a class="dropdown-item" href="/UniPortal/dashboard.php">Dashboard</a>
                         </li>
 
-                        <li><a class="dropdown-item" href="/UniPortal/logout.php">Logout</a>
+                        <li><a class="dropdown-item" href="/UniPortal/#" id="logout" onclick="destroySession()">Logout</a>
                         </li>
                     </ul>';
                 }else{
-                echo '<a class="nav-link dropdown-toggle" title="'.$username.'" href="#" id="dropdown"
+                echo '<a class="nav-link dropdown-toggle" title="'.$user_id.'" href="#" id="dropdown"
                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                 <i class="fa fa-user circle-trans"></i>
-                '.ucfirst($username).'</a>
+                 <i class="fa fa-user"></i> Profile</a>
 
                     <ul class="dropdown-menu" aria-labelledby="dropdown">
-                        <li>
-                        <a class="dropdown-item" href="/UniPortal/dashboard.php#account">My Account</a></li>
-
-                        <li>
-                        <a class="dropdown-item" href="/UniPortal/dashboard.php">Dashboard</a></li>
-
-                        <li><a class="dropdown-item" href="/UniPortal/logout.php">Logout</a></li>
-
+                        <li class="dropdown-item">
+                          <a href="/UniPortal/myaccount.php">'.$user_id.'</a>
+                        </li>
+                        <li class="dropdown-item">
+                          <a href="/UniPortal/dashboard.php">Dashboard</a>
+                        </li>
+                        <li class="dropdown-item">
+                          <a href="/UniPortal/#" id="logout" onclick="destroySession()">Logout</a>
+                        </li>
                     </ul>';
 
                 }
@@ -142,15 +109,5 @@ include_once("Student.php");
         </ul>
     </div>
 </nav>
-<div class="content-separator" id='con-sep'>
-    <?php if(is_session("student_id")){
-        $title = "Ask a question";
-    }  else {
-        $title = "Ask question as guest";
-    } ?>
-
-    <button class="btn btn-info-alt fixed" id="toggler" style="bottom:5;top: 90%;" title="<?php echo $title; ?>">
-        <span class="fa fa-plus"></span>
-    </button>
 
 <?php include_once 'scripts.php'; ?>

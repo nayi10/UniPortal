@@ -1,7 +1,7 @@
 <?php
 include_once 'functions.php';
 
-if(is_okay($_GET['search']) && is_okay($_GET['table'])){
+if(isset($_GET['search']) && isset($_GET['table'])){
     $con = new Connection();
     $conn = $con->connect();
     $table = strip_tags($_GET['table']);
@@ -9,52 +9,43 @@ if(is_okay($_GET['search']) && is_okay($_GET['table'])){
 
     if($table == "questions"){
         $query = "(SELECT * FROM questions WHERE question LIKE '%$search%' "
-                . "OR added_on LIKE '%$search%')";
+                . "OR added_on LIKE '%$search%' OR description LIKE '%$search%'
+                LIMIT 25)";
     }elseif($table == "answers"){
         $query = "(SELECT * FROM answers WHERE question LIKE '%$search%'"
-                . " OR added_on LIKE '%$search%' OR answer LIKE '%$search%')";
-    }elseif($table == "hostels"){
-        $query = "(SELECT * FROM hostels WHERE name LIKE '%$search%'"
-                . " OR description LIKE '%$search%' OR campus LIKE '%$search%')";
-    }elseif($table == "lectures"){
-        $query = "(SELECT * FROM lessons WHERE subject LIKE '%$search%'"
-                . " OR abbreviation LIKE '%$search%' OR venue LIKE '%$search%'"
-                . " OR day LIKE '%$search%')";
+                . " OR added_on LIKE '%$search%' OR answer LIKE '%$search%'
+                LIMIT 25)";
     }
-
     $result = $conn->query($query);
-    echo $conn->error;
-    $rows = $result->num_rows;
+    if($result && $result->num_rows > 0){
 
-    if($rows > 0){
-
-        echo "<h3><small>Results for your searched item '<b><i>$search</i></b>'
-                (<small>Total: $rows</small>)</small></h3>
-               <div class='col-md-12'>";
+        echo "<h6 class='text-center'>Results for '<b><i>$search</i></b>'
+                (<small><i>total: $result->num_rows</i></small>)</h6>";
 
         while($row = $result->fetch_object()){
 
-        $id = $row->id;
+          $id = $row->id;
 
-        $content = substr($row->question, 0, 250);
+          $question = substr($row->question, 0, 250);
 
-        $title = urlencode($row->course);
+          $user = $table == 'questions' ? $row->asked_by : $row->answered_by;
 
-
-        echo "<div class='card-0 hover-light-grey'>
-                    <h4>$row->lecturer</h4>
-                    <p>$content...</p>
-                    <span class='justify-content-end bg-raised p-2'><b class='text-md'>Lecturer: </b>
-                    <em>".ucfirst($row->lecturer)."</em></span>
-                    <a href='view.php?category=$row->lecturer&id=$id&utm_title=$row->course' class='btn btn-info-alt'>
-                    View</a></p>
-                </div><hr>";
+          $content = $table == 'answers' ? $row->answer: $row->description;
+          $denotation = $table == 'questions' ? 'Asked by': 'Answered by';
+          echo "<div class='card py-2 px-3 rounded'>
+                      <h4>$question</h4>
+                      <p>$content...</p>
+                      <span class='justify-content-end bg-raised p-2'>
+                      <em>$denotation: ".ucfirst($user)."</em></span>
+                      <a href='questions/?question=".urlencode($question)."' class='mr-1'>
+                        Read more...
+                      </a>
+          </div><hr>";
 
         }
 
-    echo "</div>";
-
     }else{
-        echo "<h1 class='text-center text-lg'>Nothing found</h1><hr>";
+        echo "<h1 class='text-center text-lg'>Nothing found</h1><br>
+        <button class='button button-outline'>Ask a new question</button<hr>";
     }
 }

@@ -7,24 +7,29 @@ include_once 'Classes/Connection.php';
  *
  * @author Alhassan Kamil
  */
-
- 
 class Student extends User{
-    private $hostel, $student_id, $course_degree, $prog_shortcut;
+    private $hostel, $student_id, $certificate;
     private $year_of_completion;
 
-    public function get_id() {
-        return $this->student_id;
+    function __construct($id=null){
+      if(is_null($id)){
+        $this->student_id = $id;
+      }
+      $conn = get_connection_handle();
+      $query = $conn->query("select * from users where user_id = '$id'");
+      if($query && $query->num_rows > 0){
+        $res = $query->fetch_object();
+        $this->firstname = $res->firstname;
+        $this->lastname = $res->lastname;
+        $this->middlename = $res->middlename;
+        $this->name = $res->name;
+        $this->email = $res->email;
+        $this->phone = $res->phone;
+        $this->department = $res->department;
+        $this->certificate = $res->certificate;
+        $this->hostel = $res->hostel;
+      }
     }
-
-    public function get_completion(){
-        return $this->year_of_completion;
-    }
-
-    public function get_course_degree(){
-        return $this->course_degree;
-    }
-
     public function set_course_degree($course_deg){
         $this->course_degree = $course_deg;
     }
@@ -41,8 +46,16 @@ class Student extends User{
         $this->year_of_completion = $yr;
     }
 
-    public function set_programme_shortcut($shortcut){
-        $this->prog_shortcut = $shortcut;
+    public function get_id() {
+        return $this->student_id;
+    }
+
+    public function get_completion(){
+        return $this->year_of_completion;
+    }
+
+    public function get_course_degree(){
+        return $this->course_degree;
     }
 
     public function update_details($id, $col, $details){
@@ -51,7 +64,7 @@ class Student extends User{
         $conn = get_connection_handle();
         if(isset($id) && $col !== "" && isset($details) && $details !== ""){
             /* @var $query connection handle */
-            $query = $conn->query("update students set "
+            $query = $conn->query("update users set "
                     . "$col = $details where student_id = $id");
 
             if($conn->affected_rows > 0){
@@ -61,7 +74,7 @@ class Student extends User{
                 return $conn->error;
             }
         }
-        return \FALSE;
+        return FALSE;
     }
 
     public function login($student_id, $pass){
@@ -72,7 +85,7 @@ class Student extends User{
         $errors = array();
 
         if(!is_okay($student_id)){
-            $errors[] = 'Stduent ID is required';
+            $errors[] = 'Your ID is required';
         } else{
             $sdt_id = strip_tags(trim(htmlspecialchars($student_id)));
         }
@@ -84,7 +97,7 @@ class Student extends User{
         }
 
         if(!$errors){
-            $stmt = $conn->prepare("SELECT * FROM students WHERE student_id = ?");
+            $stmt = $conn->prepare("SELECT * FROM users WHERE user_id = ?");
             $stmt->bind_param('s', $sdt_id);
 
             $stmt->execute();
@@ -102,28 +115,26 @@ class Student extends User{
                     if(!session_id())
                         session_start();
 
-                    $_SESSION["student_id"] = $sdt_id;
-
+                    $_SESSION["user_id"] = $sdt_id;
+                    $_SESSION["username"] = $r['username'];
                     $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
 
                     $_SESSION['email'] = $r['email'];
 
                     $_SESSION['id'] = $r['id'];
-
-                    ini_set('session.save_path', "/users/$student_id/sessions");
                     echo "<script>history.go(-2);</script>";
 
                 }else{
                     if(!session_id())
                         session_start();
-                    $errors[] = "Invalid Student ID and/or password";
+                    $errors[] = "Invalid ID and/or password";
                     $_SESSION['errors'] = $errors;
                 }
 
             } else{
                 if(!session_id())
                     session_start();
-                $errors[] = "Invalid Student ID and/or password";
+                $errors[] = "Invalid ID and/or password";
                 $_SESSION['errors'] = $errors;
             }
 

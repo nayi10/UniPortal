@@ -1,194 +1,121 @@
 <?php
 require_once('header.php');
+require_once('Event.php');
 ?>
-<div class='container'>
-    <div id='meta-info' class='hide'>Enroll in upcoming educational events and grow your academic horizons
-    </div>
-    <br><br>
-    <div class='row d'>
-        <div class='col-md-10 mx-auto'>
-            <div class="card-4 p-3">
-
-            <div class="row">
+<div class='container-fluid'>
 <?php
 $conn = get_connection_handle();
-if(isset($_GET['utm_id']) && !empty($_GET['utm_id'])){
-    $id = clean_data("utm_id");
-    $stmt = $conn->query("select * from events where id = $id");
-    $rows = $stmt->num_rows;
+if(isset($_GET['title']) && !empty($_GET['title'])){
+    $title = strip_tags($_GET["title"]);
+    $event = new NewEvent($title);
+    if($event->get_id() > 0){
+        $organizer = $event->get_organizer();
+        $location = $event->get_location();
+        $contact = $event->get_contact();
+        $desc = nl2br($event->get_description());
+        $event_type = $event->get_type();
+        $start_date = $event->get_start_date();
+        $end_date = $event->get_end_date();
+        $time = $event->get_time();
+        $misc = $event->get_misc();
+        $added = new DateTime($event->get_added_on());
+        $added_on = $added->format("M dS, Y h:i:sa");
+        $img = $event->get_image($event->get_title());
 
-    if($rows == 1){
-
-        while($row = $stmt->fetch_object()){
-
-            $filehandle = "files_x64/events/images/".md5($row->title);
-
-            if(file_exists($filehandle.".png")){
-
-                $image = $filehandle.".png";
-
-            }elseif(file_exists($filehandle.".jpg")){
-
-                $image = $filehandle.".jpg";
-
-            }elseif(file_exists($filehandle.".gif")){
-
-                $image = $filehandle.".gif";
-
-            }else{
-                $image = "images/default.jpg";
-            }
-
-            $content = strip_tags($row->description);
-            $title = strip_tags($row->title);
-
-            echo "<div class='col-md-5'>
-                    <img src='$image' class='img-round event-img'>
+        $el = <<<KL
+        <div class="container mt-3">
+            <h1 class="text-center mb-2">Viewing event - $title</h1>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="container-fluid">
+                        <div class="card p-2">
+                            <img src="$img" height="300" class="card-img rounded">
+                            <h2 class="card-title text-center pt-2">$title</h2>
+                        </div><br>
+                        <ul class="list-group">
+                            <li class="list-group-item active hover-none">
+                                More Details
+                            </li>
+                            <li class="list-group-item" title="Organizer">
+                                <i class="fa fa-institution text-green pr-3"></i> $organizer
+                            </li>
+                            <li class="list-group-item" title="Event location">
+                                <i class="fa fa-map-marker text-green pr-3 pl-1"></i> $location
+                            </li>
+                            <li class="list-group-item" title="Event type">
+                                <i class="fa fa-briefcase text-green pr-3"></i> $event_type
+                            </li>
+                            <li class="list-group-item" title="Event organizer's contact">
+                                <i class="fa fa-phone-square text-green pr-3"></i> $contact
+                            </li>
+                            <li class="list-group-item" title="Event interval">
+                                <i class="fa fa-calendar-o text-green pr-3"></i> $start_date to $end_date
+                            </li>
+                            <li class="list-group-item" title="Event time">
+                                <i class="fa fa-clock-o text-green pr-3"></i> $time
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            <div class='col-md-7'>
-                <h1 class='card-title'>$title</h1>
-            <p>$content</p>
-        </div>
-        <p class='p-2 ml-2'>
-            <span class='ml-md-0 mr-sm-2'>
-                <i class='fa fa-address-book text-green'></i>
-                $row->organizer
-            </span>
-            <span class='ml-md-5'>
-                <i class='fa fa-map-marker text-green'></i>
-                $row->location
-            </span>
-            <span class='ml-md-5 hide-sm'>
-                <i class='fa fa-graduation-cap text-green'></i> $row->type
-            </span>
-            <span class='text-sm ml-5 ml-sm-3'>
-            <i class='fa fa-calendar text-brown'></i> $row->start_date
-            </span> |
-
-            <span class='text-sm ml-md-4 ml-sm-3'>
-                <i class='fa fa-calendar-o text-green'></i> $row->end_date
-            </span> |
-
-            <span class='text-sm ml-md-4 ml-sm-2'>
-                <i class='fa fa-clock-o text-brown'></i> $row->time
-            </span>
-        </p><br>";
-        }
-    }else{
-        echo '<h1 class="text-center text-md">We couldn\'t understand your '
-        . 'request, please try again</h1>';
-    }
-    echo "</div></div>";
-}else{
-    $stmt = $conn->query("select * from events order by id desc limit 15");
-
-    $rows = $stmt->num_rows;
-
-    if($rows > 0){
-
-        while($row = $stmt->fetch_object()){
-
-            $id = strip_tags($row->id);
-
-            $title = urlencode($row->title);
-
-            $point = strpos($row->description, ".");
-
-            if(str_word_count(substr($row->description, 0, $point)) <= 25){
-                $content = substr($row->description, 0, $point);
-            }elseif(str_word_count(substr($row->description, 0, $point)) <= 35){
-                $content = substr($row->description, 0, $point - 100);
-            }else{
-                $content = trim(substr($row->description,0, 200));
-            }
-
-            echo "<div class='row'>
-            <div class='col-md-4'>";
-
-            $filehandle = "files_x64/events/images/".md5($row->title);
-
-            if(file_exists($filehandle.".png")){
-
-                $image = $filehandle.".png";
-
-            }elseif(file_exists($filehandle.".jpg")){
-
-                $image = $filehandle.".jpg";
-
-            }elseif(file_exists($filehandle.".gif")){
-
-                $image = $filehandle.".gif";
-
-            }else{
-                $image = "images/default.jpg";
-            }
-
-            echo "<a href='events.php?utm_id=$id'>
-                    <img src='$image' max-height='200px' class='img-round event-img'>
-                    </a>
+                <div class="col-md-7">
+                    <div class="card p-2">
+                        <h3 class="card-title pl-4 pt-2" style="font-size:1.4rem;">Event Description</h3>
+                        <div class="card-body">
+                            <p>$desc</p><hr>
+                            <p>
+                                <span class="bd-highlight">Posted by $organizer on $added_on</span>
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <div class='col-md-8'>
-                <p>
-                    <span class='ml-md-0 mr-sm-2'>
-                        <i class='fa fa-address-book text-green'></i>
-                        $row->organizer
-                    </span>
-                    <span class='ml-md-5'>
-                        <i class='fa fa-map-marker text-green'></i>
-                        $row->location
-                    </span>
-                    <span class='ml-md-5 hide-sm'>
-                        <i class='fa fa-graduation-cap text-green'></i> $row->type
-                    </span>
-                </p><hr>
-                <div>$content... <a href='events.php?utm_id=$id' class='text-blue text-sm'>More
-                    <i class='fa fa-angle-double-right'></i></a>
-                </div><hr>
-                <p><span class='text-sm ml-0'>
-                    <i class='fa fa-calendar text-brown'></i> $row->start_date
-                    </span> |
-
-                    <span class='text-sm ml-md-4 ml-sm-3'>
-                        <i class='fa fa-calendar-o text-green'></i> $row->end_date
-                    </span> |
-
-                    <span class='text-sm ml-md-4 ml-sm-2'>
-                        <i class='fa fa-clock-o text-brown'></i> $row->time
-                    </span>
-                </p>
             </div>
-          </div><hr>
         </div>
-            <br>";
-        }
-        echo "</div></div></div>";
+KL;
+        echo $el;
     }else{
-        echo "<h3 class='text-center'>No events available at the moment.</h3>";
-
+        include_once("404.html");
+    }
+}else{
+    $events = new NewEvent();
+    $res = $events->get_events(7);
+    if($res && $res->num_rows > 0){
+    ?>
+    <h1 class="text-center">All Upcoming Events</h1>
+    <div class="row">
+    <?php while($row = $res->fetch_object()){
+    $img = $events->get_image($row->title);
+    $desc = substr($row->description, 0, 140);
+    $url = urlencode($row->title);
+    $result = <<<ML
+    <div class="col-md-6 mb-4">
+        <div class="card card-hover">
+            <div class="row">
+                <div class='col-md-4'>
+                <img src="$img" class="img-round" height="160">
+                </div>
+                <div class="col-md-8 px-4">
+                    <h4 class="card-title mt-2">$row->title</h4>
+                    <p class="card-text home">$desc... 
+                        <a class="card-link text-sm" href="events.php?title=$url">
+                        More details...
+                        </a>
+                    </p>
+                    <span class="text-special text-green">
+                        <span class="fa fa-map-marker"> $row->location</span>
+                        <span class="fa fa-calendar mx-2"> $row->start_date</span>
+                        <span class="fa fa-clock-o"> $row->time</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+ML;
+    echo $result;
+        }
+        echo "</div>";
     }
 }
 
 echo "</div></div>";
 
-require_once('footer.php');
 ?>
-<script>
-     $(window).scroll(function () {
-        if ($(window).scrollTop() >= 152) {
-
-            $('.sidebar').addClass('fixed');
-            $('.sidebar').css('transition-duration', '0.3s');
-            $('.sidebar').css('place-content','end left');
-
-        } else {
-            $('.sidebar').removeClass('fixed');
-
-        }
-
-        if((window).scrollTop() >= 250){
-            $('.sidebar').removeClass('border-right');
-        }else{
-            $('.sidebar').addClass('border-right');
-        }
-    });
-</script>

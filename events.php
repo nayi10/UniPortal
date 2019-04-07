@@ -23,49 +23,45 @@ if(isset($_GET['title']) && !empty($_GET['title'])){
         $img = $event->get_image($event->get_title());
 
         $el = <<<KL
-        <div class="container mt-3">
-            <h1 class="text-center mb-2">Viewing event - $title</h1>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="container-fluid">
-                        <div class="card p-2">
-                            <img src="$img" height="300" class="card-img rounded">
-                            <h2 class="card-title text-center pt-2">$title</h2>
-                        </div><br>
-                        <ul class="list-group">
-                            <li class="list-group-item active hover-none">
-                                More Details
-                            </li>
-                            <li class="list-group-item" title="Organizer">
-                                <i class="fa fa-institution text-green pr-3"></i> $organizer
-                            </li>
-                            <li class="list-group-item" title="Event location">
-                                <i class="fa fa-map-marker text-green pr-3 pl-1"></i> $location
-                            </li>
-                            <li class="list-group-item" title="Event type">
-                                <i class="fa fa-briefcase text-green pr-3"></i> $event_type
-                            </li>
-                            <li class="list-group-item" title="Event organizer's contact">
-                                <i class="fa fa-phone-square text-green pr-3"></i> $contact
-                            </li>
-                            <li class="list-group-item" title="Event interval">
-                                <i class="fa fa-calendar-o text-green pr-3"></i> $start_date to $end_date
-                            </li>
-                            <li class="list-group-item" title="Event time">
-                                <i class="fa fa-clock-o text-green pr-3"></i> $time
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-7">
-                    <div class="card p-2">
-                        <h3 class="card-title pl-4 pt-2" style="font-size:1.4rem;">Event Description</h3>
-                        <div class="card-body">
-                            <p>$desc</p><hr>
-                            <p>
-                                <span class="bd-highlight">Posted by $organizer on $added_on</span>
-                            </p>
-                        </div>
+        <h1 class="text-center mb-2">Viewing event - $title</h1>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card p-2">
+                    <img src="$img" height="300" class="card-img rounded">
+                    <h2 class="card-title text-center pt-2">$title</h2>
+                </div><br>
+                <ul class="list-group  mb-md-2">
+                    <li class="list-group-item active hover-none">
+                        More Details
+                    </li>
+                    <li class="list-group-item" title="Organizer">
+                        <i class="fa fa-institution text-green pr-3"></i> $organizer
+                    </li>
+                    <li class="list-group-item" title="Event location">
+                        <i class="fa fa-map-marker text-green pr-3 pl-1"></i> $location
+                    </li>
+                    <li class="list-group-item" title="Event type">
+                        <i class="fa fa-briefcase text-green pr-3"></i> $event_type
+                    </li>
+                    <li class="list-group-item" title="Event organizer's contact">
+                        <i class="fa fa-phone-square text-green pr-3"></i> $contact
+                    </li>
+                    <li class="list-group-item" title="Event interval">
+                        <i class="fa fa-calendar-o text-green pr-3"></i> $start_date to $end_date
+                    </li>
+                    <li class="list-group-item" title="Event time">
+                        <i class="fa fa-clock-o text-green pr-3"></i> $time
+                    </li>
+                </ul>
+            </div><br>
+            <div class="col-md-7">
+                <div class="card p-2">
+                    <h3 class="card-title pl-4 pt-2" style="font-size:1.4rem;">Event Description</h3>
+                    <div class="card-body">
+                        <p>$desc</p><hr>
+                        <p>
+                            <span class="bd-highlight">Posted by $organizer on $added_on</span>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -90,8 +86,8 @@ KL;
     <div class="col-md-6 mb-4">
         <div class="card card-hover">
             <div class="row">
-                <div class='col-md-4'>
-                <img src="$img" class="img-round" height="160">
+                <div class='col-md-4 mb-md-2'>
+                    <img src="$img" class="img-round" height="160">
                 </div>
                 <div class="col-md-8 px-4">
                     <h4 class="card-title mt-2">$row->title</h4>

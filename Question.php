@@ -340,6 +340,20 @@ class Question {
         }
         return false;
     }
+    function get_all_by_tag($tag, $limit=null){
+        $conn = get_connection_handle();
+        if(!is_null($limit)){
+            $query = $conn->query("select distinct id, question from questions where 
+            tags like '%$tag%' order by added_on DESC LIMIT $limit");
+        }else{
+            $query = $conn->query("select distinct id, question from questions where 
+            tags like '%$tag%' order by added_on DESC LIMIT 25");
+        }
+        if($query && $query->num_rows > 0){
+            return $query;
+        }
+        return false;
+    }
     function get_questions($limit=null){
         $conn = get_connection_handle();
         if(!is_null($limit)){

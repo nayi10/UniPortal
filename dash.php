@@ -51,7 +51,7 @@
     }
 
     $qry = $user->get_assignments();
-    if($qry && $qry->num_rows > 0){
+    if($qry && $qry->num_rows > 0 && $_SESSION['user_type'] == "Normal"){
         echo "<div class='col-lg col-md-4'>
         <h5 class='card-title mx-2'>Assignments to do</h5>
         <ul class='list-group'>";

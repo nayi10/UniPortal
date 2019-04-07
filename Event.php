@@ -188,14 +188,10 @@ class NewEvent
     $yr = $y->format("Y");
     $img = implode("-", explode(" ", strtolower($title)));
     $filehandle = "images/events/".$yr."/".$img;
-
       //Is the image a .png file...
     if (file_exists($filehandle . ".png")) {
-
       $image = $filehandle . ".png";
-
     } elseif (file_exists($filehandle . ".jpg")) {
-
       $image = $filehandle . ".jpg";
 
     } elseif (file_exists($filehandle . ".gif")) {

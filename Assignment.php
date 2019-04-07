@@ -95,7 +95,7 @@ class Assignment {
         return $this->submit_time;
     }
 
-    public function set_questions($question){
+    public function set_question($question){
         $this->question = $question;
     }
     function set_course($course){
@@ -111,13 +111,19 @@ class Assignment {
     }
 
     function insert(){
-        $stmt = $this->db_connect->prepare("INSERT INTO assignments(question,"
-            . "course,given_date,submit_date,lecturer) VALUES(?,?,?,?,?)");
-        $stmt->bind_params('sssss',$this->question,$this->course,$this->given_date,
-            $this->submit_date,$this->lecturer);
+        $conn = get_connection_handle();
+        $stmt = $conn->prepare("INSERT INTO assignments(question, course, given_date,
+        submit_date,submit_time,lecturer,submission_method,submission_format,added_on) 
+        VALUES(?,?,?,?,?,?,?,?,?)");
+        $dat = new DateTime();
+        $date = $dat->format("Y-m-d H:i:sa");
+        $given_date = $dat->format("Y-m-d");
+        $stmt->bind_param('sssssssss',$this->question,$this->course,$given_date,
+            $this->submit_date, $this->submit_time,$this->lecturer, $this->submission_method,
+            $this->submission_format, $date);
         $stmt->execute();
         if($stmt->affected_rows == 0){
-            return $stmt->affected_rows;
+            return true;
         }
         return false;
     }
@@ -136,22 +142,3 @@ class Assignment {
         return FALSE;
     }
 }
-$con = new Connection();
-$conn = $con->connect();
-$ass = new Assignment($conn);
-$stmt = $ass->get_assignments();
-$rows = $stmt->num_rows;
-?>
-<div>
-    <h1>Assignments to do</h1>
-    <ul>
-        <?php
-        while ($row = $stmt->fetch_object()){
-        echo "<li>$row->question</li>"
-                . "<li>$row->course</li>"
-                . "<li>".ucwords($row->lecturer)."</li><hr>";
-        }
-        ?>
-
-    </ul>
-</div>

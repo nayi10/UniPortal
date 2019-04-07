@@ -1,11 +1,13 @@
 <?php
+//Checks whether there exists a user session
 if(!session_id())
-  session_start();
+  session_start();//If no session, start one
 
+  //Folder in which this file resides. Donno why
 $directory = basename(dirname($_SERVER['PHP_SELF']));
 
 require_once('functions.php');
-include_once("Student.php");
+include_once("User.php");
 
 ?>
 <!DOCTYPE html>
@@ -26,7 +28,7 @@ include_once("Student.php");
 
 <body>
 
-<nav class="fixed-top navbar-expand-md navbar">
+<nav class="navbar fixed-top navbar-expand-sm">
 
   <a class="navbar-brand mr-5" href="/UniPortal">UniPortal</a>
 
@@ -37,12 +39,12 @@ include_once("Student.php");
 
   </button>
 
-  <div class="collapse navbar-collapse" id="navbar-toggle">
+  <div class="collapse navbar-collapse flex-grow-0" id="navbar-toggle">
 
-    <ul class="navbar-nav" id="main-menu">
-        <li class="nav-item">
+    <ul class="navbar-nav ml-auto" id="main-menu">
+        <!-- <li class="nav-item">
             <input type="search" name="search" placeholder="Search content" class="nav-form-input">
-        </li>
+        </li> -->
         <li class="nav-item">
             <a class="nav-link" href="/UniPortal/questions/">Questions</a>
         </li>
@@ -58,49 +60,44 @@ include_once("Student.php");
 
         <li class="nav-item dropdown">
         <?php
-            if(isset($_SESSION['user_id']) && $_SESSION['user_id'] != ''){
-
-                $user_id = strtoupper($_SESSION['user_id']);
-
-                $user_dir = "users/myaccount/images/".$user_id.".jpg";
-
-                if(file_exists($user_dir)){
-
-                    echo'<a class="nav-link dropdown-toggle" title="'.$user_id.'" href="#" id="dropdown"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <img src="'.$user_dir.'" class="img-circle"></a>
-                    <ul class="dropdown-menu" aria-labelledby="dropdown">
-                        <li>
-                            <a class="dropdown-item" href="/UniPortal/dashboard.php#account">My Account</a>
-                        </li>
-
-                        <li>
-                        <a class="dropdown-item" href="/UniPortal/dashboard.php">Dashboard</a>
-                        </li>
-
-                        <li><a class="dropdown-item" href="/UniPortal/#" id="logout" onclick="destroySession()">Logout</a>
-                        </li>
-                    </ul>';
+            if(isset($_SESSION['username'])){
+                $username = $_SESSION['username'];
+                $user = new User($username);//New user object
+                if($user->get_profile_image()){
+                    //Has profile image? Display it beside their name on the navbar
+                    $img = $user->get_profile_image();
+                    $link = "<a class='nav-link dropdown-toggle' href='#' id='dropdown' data-toggle='dropdown'>
+                        <img src='$img' class='img-circle'/>
+                    </a>";
                 }else{
-                echo '<a class="nav-link dropdown-toggle" title="'.$user_id.'" href="#" id="dropdown"
-                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                 <i class="fa fa-user"></i> Profile</a>
-
-                    <ul class="dropdown-menu" aria-labelledby="dropdown">
-                        <li class="dropdown-item">
-                          <a href="/UniPortal/myaccount.php">'.$user_id.'</a>
-                        </li>
-                        <li class="dropdown-item">
-                          <a href="/UniPortal/dashboard.php">Dashboard</a>
-                        </li>
-                        <li class="dropdown-item">
-                          <a href="/UniPortal/#" id="logout" onclick="destroySession()">Logout</a>
-                        </li>
-                    </ul>';
-
+                    $link = '<a class="nav-link dropdown-toggle" href="#" id="dropdown" data-toggle="dropdown">
+                        <i class="fa fa-user"></i> '.$username.'
+                    </a>';
                 }
+                //User type[admin, normal], shows dropdown items depending on this
+                $usrType = $_SESSION['user_type'] == "Normal"? 
+                '<li>
+                    <a class="dropdown-item" href="/UniPortal/dashboard.php">Dashboard</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="/UniPortal/dashboard.php?tab=myaccount">My Account</a>
+                </li>':
+                '<li>
+                    <a class="dropdown-item" href="/UniPortal/admin.php">Dashboard</a>
+                </li>';
 
+                $tofl = <<<TOFL
+                $link
+                <ul class="dropdown-menu dropdown-menu-right">
+                    $usrType
+                    <li>
+                        <a class="dropdown-item" href="logout.php">Logout</a>
+                    </li>
+                </ul>
+TOFL;
+                echo $tofl;
             } else {
+                    $username = "";
                     echo '<a href="/UniPortal/login.php" class="nav-link">Login</a>';
                 }
             ?>
@@ -109,5 +106,40 @@ include_once("Student.php");
         </ul>
     </div>
 </nav>
-
+<!-- Question form in the form of a modal window-->
+<div class="modal fade" id="popup" tabindex="-1" role="dialog" aria-labelledby="newModal" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="newModal">Ask a new question</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="alert hide mt-3"></div>
+              <form id="questionForm">
+                  <div class="modal-body">
+                      <label for="question">Question</label>
+                      <input type="text" name="question" id="question-input" class="form-control">
+                      <div id="matched-list" class="hide"></div>
+                      <div id="description"></div>
+                      <!--input type="hidden" name="desc" id="desc" -->
+                      <label for="tags" class="mr-2 mt-1">Tags</label>
+                      <input type="text" class="form-control" id="tags">
+                      <input type="hidden" name='tags' id="tag-cont">
+                      <input type="hidden" name='username' id="username" value="<?php echo $username;?>">
+                      <div class="mt-2" id="tag-container"></div>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      <button type="submit" id="btnAdd" class="btn btn-primary">Ask question</button>
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+    <!-- Floating action button - used to ask questions -->
+    <button class="btn-circle" id="btn-circle" data-toggle="modal" data-target="#popup">
+        <i class="fa fa-question"></i>
+    </button>
 <?php include_once 'scripts.php'; ?>

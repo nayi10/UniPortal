@@ -69,11 +69,13 @@ LT;
                             }else{
                                 $file = "images/picture.png";
                             }
-
-                            $result = $conn->query("select added_on, added_at from chats where 
+                            $result = $conn->query("select added_on from chats where 
                                     sender = receiver = '$row->receiver' 
                                     order by id desc limit 1");
                             $r = $result->fetch_object();
+                            $d_ = new DateTime($r->added_on);
+                            $date_ = $d_->format("d-m-Y");
+                            $time = $d_->format("H:ia");
                             $tl = <<<REM
                             <li id="last">
                                 <div class='d-flex bd-highlight'>
@@ -86,7 +88,7 @@ LT;
                                         <a href='dashboard.php?tab=chat&chatwith=$row->receiver'>
                                             <span>$row->receiver</span>
                                         </a>
-                                        <p>$r->added_on, $r->added_at</p>
+                                        <p>$date_, $time</p>
                                     </div>
                                 </div>
                             </li>
@@ -109,7 +111,7 @@ REM;
                         $f = file_exists($dir)? $dir: "images/picture.png";
                         $img = "<img src='$f' class='rounded-img user_img'>";
                     }else{
-                        $uname = "Choose person to chat with";
+                        $uname = "";
                         $img = "";
                     }
                     ?>
@@ -117,7 +119,7 @@ REM;
                             <?php echo $img; ?>
                         </div>
                         <div class="user_info">
-                            <span><?php echo $uname;?></span>
+                            <span><?php echo $uname == ""? "Choose someone to chat": $uname;;?></span>
                             <span class="online_status"></span>
                         </div>
                     </div>
@@ -125,7 +127,7 @@ REM;
                     <div class="action_menu">
                         <ul>
                             <li><i class="fa fa-user-circle"></i> 
-                            <a href="user/<?php echo $uname;?>/" class="text-white">
+                            <a href="users/<?php echo strtolower($uname);?>/" class="text-white">
                                 View profile
                             </a>
                             </li>
@@ -133,6 +135,7 @@ REM;
                         </ul>
                     </div>
                 </div>
+                <input id='omgUser' type='hidden' value="<?php echo $uname; ?>">
                 <div class="card-body msg_card_body">
                     <?php include_once("chat-server.php");?>
                 </div>
@@ -146,7 +149,8 @@ REM;
                             </div>
                             <textarea name="message" id="chat-msg" class="form-control type_msg" placeholder="Type your message..."></textarea>
                             <div class="input-group-append">
-                                <button class="input-group-text send_btn"><i class="fa fa-location-arrow"></i></button>
+                                <button class="input-group-text send_btn">
+                                    <i class="fa fa-location-arrow"></i></button>
                             </div>
                         </div>
                     </form>
@@ -155,7 +159,39 @@ REM;
         </div>
     </div>
 </div>
+
+<script src="js/dropzone.js"></script>
 <script>
+    $(".attach_btn").click(function(){
+       $(".msg_card_body").removeClass("msg_card_body").addClass("dropzone").prop("id", "shareTo")
+    })
+    Dropzone.options.shareTo = {
+        url: 'upload.php',
+        paramName: "shareFile",
+        acceptedFiles: ".png,.jpg,.pdf, .doc, .docx, .odg, .ods, .xlsx,.xls,.ppt, .pptx",
+        autoProcessQueue: true,
+        maxFiles: 1,
+        maxFilesize: 150,
+        addRemoveLinks: true,
+        init: function() {
+            dzClosure = this;
+            this.on("sending", function(data, xhr, formData){
+                shareWith = $("#omgUser").val();
+                formData.append("sharewith", shareWith.toLowerCase());
+            })
+            .on("success", function(file, res) {
+                if(res == "File has been shared with " + shareWith){
+                    $(".alert").removeClass("hide").addClass("alert-success").html(res.toUpperCase());
+                }else{
+                    $(".alert").removeClass("hide").addClass("alert-info").html(res.toCase());
+                }
+            })
+            .on("maxfilesexceeded", function(file) { this.removeFile(file); })
+            .on("fail",function(error){
+                $(".alert").removeClass("hide").addClass("alert-danger").html(error)
+            })      
+        }
+    }
 $(document).ready(function(){
     $('#action_menu_btn').click(function(){
         $('.action_menu').toggle();
@@ -171,13 +207,11 @@ $(".search").on('input', function(e){
             data: {name: search}
         })
         .done(function(data){
-            console.log("Data: " + data)
             $("#result").removeClass("hide").html(data);
         })
         .fail(function(error){
             $("#result").removeClass("hide").css("color", 'red').text("There is an error getting the results - " + error);
         })
-        console.log("Value: " + search)
     }
 })
 setInterval(function(){
@@ -204,14 +238,16 @@ $("#chat-msg").keypress(function (e) {
         let val = $(this).val();
         let sender = $("#sender").val();
         let receiver = $("#receiver").val();
-        if($("#chat-msg").val() !== ''){
+        if($("#chat-msg").val() !== '' && sender !== '' && receiver !== ''){
             $.ajax({
                 method: "POST",
                 url: "process.php",
                 data: {message: val, sender: sender, receiver: receiver}
                 })
                 .done(function(data){
-                    console.log("Message: " + data + "\nData: " + data);
+                    if(data == "Chat has been added"){
+                        $(".msg_card_body").scrollTop($(".msg_card_body")[0].scrollHeight)
+                    }
                 })
                 .fail(function(error){
                     console.log("Error occured: " + error)
@@ -230,6 +266,11 @@ $("#chat-form").submit(function (e) {
             method: "POST",
             url: "process.php",
             data: {message: val, sender: sender, receiver: receiver}
+            })
+            .success(function(response){
+                if(response == "Chat has been added"){
+                    $(".msg_card_body").scrollTop($(".msg_card_body")[0].scrollHeight)
+                }
             })
             .fail(function(error){
                 console.log("Error occured: " + error)

@@ -5,13 +5,14 @@ if(!session_id())
     include_once("functions.php");
 
     function getChat($sender, $receiver, $username, $msg, $time){
+     
         if($sender == $username){
             $file = file_exists("images/$username.jpg")? $username.".jpg":"picture.png";
             $cont = <<<ML
                 <div class="d-flex justify-content-end mb-4">
-                    <div class="msg_cotainer_send">
+                    <div class="msg_container_send">
                         $msg
-                        <span class="msg_time">$time</span>
+                        <span class="msg_time_send">$time</span>
                     </div>
                     <div class="img_cont_msg">
                         <img src="images/$file" class="rounded-circle user_img_msg">
@@ -26,7 +27,7 @@ ML;
                     <div class="img_cont_msg">
                         <img src="images/$file" class="rounded-circle user_img_msg">
                     </div>
-                    <div class="msg_cotainer">
+                    <div class="msg_container">
                         $msg
                         <span class="msg_time">$time</span>
                     </div>
@@ -50,10 +51,13 @@ ML;
         }
         if($query->num_rows > 0){
             while($row = $query->fetch_object()){
-                if(strtotime($row->added_on) == strtotime(date("d-m-Y"))){
-                    $time_date = $row->added_at.", Today";
+                $ti = new DateTime($row->added_on);
+                $date_now = $ti->format("d-m-Y");
+                $time_now = $ti->format("H:ia");
+                if(strtotime($date_now) == strtotime(date("d-m-Y"))){
+                    $time_date = "Today, ".$time_now;
                 }else{
-                    $time_date = $row->added_at.", ".$row->added_on;
+                    $time_date = $date_now.", ".$time_now;
                 }
                 $chat = getChat($row->sender, $row->receiver,$username,$row->message,$time_date);
                 echo $chat;

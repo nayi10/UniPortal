@@ -1,22 +1,22 @@
 <?php
-require_once("header.php");
-include_once("functions.php");
-include_once("User.php");
+require_once("../../header.php");
+include_once("../../functions.php");
+include_once("../../User.php");
 $conn = get_connection_handle();
 $username = basename(dirname(__FILE__));
 $user = new User($username);
-$stmt = $conn->query("SELECT * FROM users WHERE username = 'nayi'");
+$stmt = $conn->query("SELECT * FROM users WHERE username = '$username'");
 if($stmt && $stmt->num_rows > 0){
     $num_questions = $user->get_question_count();
     $aupvotes = $conn->query("select sum(votes) as total from votes where type = 'answer' 
-    and vote_type = 'upvote' and username = 'nayi10'");
+    and vote_type = 'upvote' and username = '$username'");
     $arows = $aupvotes->fetch_object();
     $num_answers = $user->get_answer_count();
-    $questions = $conn->query("select question from questions where asked_by = 'nayi10'");
+    $questions = $conn->query("select question from questions where asked_by = '$username'");
     $qupvotes = $conn->query("select sum(votes) as total from votes where type = 'question' 
-    and vote_type = 'upvote' and username = 'nayi10'");
+    and vote_type = 'upvote' and username = '$username'");
     $qrows = $qupvotes->fetch_object();
-    $answers = $conn->query("select question from answers where answered_by = 'nayi10'");
+    $answers = $conn->query("select question from answers where answered_by = '$username'");
     while($row = $stmt->fetch_object()){
         $details = <<<_EFL
     <div class="row">
@@ -51,7 +51,7 @@ if($stmt && $stmt->num_rows > 0){
                             <strong>Last name:</strong> <span class="float-right text-md">$row->lastname</span>
                         </li>
                         <li class="list-group-item">
-                            <strong>Username:</strong> <span class="float-right text-md">$row->firstname</span>
+                            <strong>Lastname:</strong> <span class="float-right text-md">$row->firstname</span>
                         </li>
                         <li class="list-group-item">
                             <strong>User ID:</strong> <span class="float-right text-md">$row->user_id</span>
@@ -68,9 +68,9 @@ _EFL;
     echo $details;
     }
     echo '
-    <div class="tab-pane fade show" role="tabpanel" id="contribute" aria-labelledby="-tab">
-        <div class="d-flex list-group">
-            <h3 class="text-md">Questions</h3>';
+    <div class="tab-pane fade show" role="tabpanel" id="contribute" aria-labelledby="contrib-tab">
+        <div class="d-flex list-group pl-3">
+            <h3 class="text-md mt-2">Questions</h3>';
     if($questions->num_rows > 0){
         while($rows = $questions->fetch_object()){
             $url = urlencode($rows->question);
@@ -80,14 +80,13 @@ _EFL;
         }
         echo '<div class="list-group-item">
                 <span>Question upvotes </span><span class="float-right">'.$qrows->total.'</span>
-            </div>
-        </div>';
+            </div>';
     }else{
-        echo "<h2 class='text-center'>No questions yet</h2>";
+        echo "<p>No questions asked yet</p>";
     }
 
-    echo '<hr><div class="d-flex list-group">
-        <h3 class="text-md">Answers</h3>';
+    echo '</div><hr><div class="d-flex list-group pl-3">
+        <h3 class="text-md mt-2">Answers</h3>';
     if($answers->num_rows > 0){
         while($rws = $answers->fetch_object()){
             $url = urlencode($rws->question);
@@ -98,8 +97,9 @@ _EFL;
     
         echo '<div class="list-group-item">
                 <span>Answer upvotes  </span><span class="float-right">'.$arows->total.'</span>
-            </div>
-        </div>';
+            </div>';
+    }else{
+        echo "<p>User has not answered any questions yet</p>";
     }
     echo "</div>
         </div>

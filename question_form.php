@@ -1,38 +1,32 @@
-<div class="container question-form">
-  <form action="<?php $_SERVER['PHP_SELF']; ?>" method="post">
-      <label for="title" id="lbl-title"></label><br>
-      <input type="text" class="inline" placeholder="Questiion" name="question" id="title">
-      <br>
-      <div id="question"></div>
-      <label for="tags">Tags</label><br>
-      <input type="text" name="tags" id="tags"><hr>
-      <div class="hide" id="tags-cont" disabled></div>
-      <input class="hide" name='question' id="question-content">
-      <button name="submit" class="btn btn-info">
-          Post Question
-      </button>
-  </form>
+<?php include("header.php");?>
+<div class="modal fade" id="popup" tabindex="-1" role="dialog" aria-labelledby="newModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newModal">Ask a new question</h5>
+                <div class="alert hide mt-3"></div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="questionForm">
+                <div class="modal-body">
+                    <label for="question">Question</label>
+                    <input type="text" name="question" id="question" class="form-control">
+                    <div id="matched-list" class="hide"></div><hr>
+                    <label for="desc">Add a description</label>
+                    <div id="description"></div>
+                    <div class="input-group">
+                        <label for="tags">Add tags</label>
+                        <input type="text" class="form-control" id="tags" name="tags">
+                        <input type="hidden" name='username' id="username" value="$username">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="btnAdd" class="btn btn-primary">Ask question</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
-<script>
-    $('#title').on('input', function(){
-      if($(this).val().length > 0){
-        $("#lbl-title").fadeIn().text("Question");
-      }else{
-        $("#lbl-title").text("");
-      }
-
-    })
-    $("#question").on('input', function(){
-        $("#question-content").val($("#question").html())
-    })
-    $("#tags").on('input', function(){
-      if($(this).val().includes(",")){
-        let lastChar = $(this).val().lastIndexOf(",");
-        let tag = this.value.slice(0, lastChar);
-        $("#tags-cont").removeClass("hide");
-        tag.innerHTML += tag;
-      }else{
-        console.log("woow")
-      }
-    })
-</script>

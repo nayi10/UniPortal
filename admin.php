@@ -1,8 +1,10 @@
 <?php
-include_once("header.php");
-if(isset($_SESSION['username'])){
+if(!session_id())
+    session_start();
+    
+if(isset($_SESSION['username']) && $_SESSION['user_type'] == "Admin"){
+    include_once("header.php");
     $username = $_SESSION['username'];
-    $userid = $_SESSION['user_id'];
     $email = $_SESSION['email'];
     $id = $_SESSION['id'];
 }else{

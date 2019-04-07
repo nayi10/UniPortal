@@ -54,7 +54,7 @@ include_once("Hostel.php");
             </div>
                 <?php } ?>
         </div>
-            <div class="col-md-8 col-lg-6">
+        <div class="col-md-8 col-lg-6">
             <form class="search-form">
                 <div class="input-group">
                     <input name='search' type="search" class="form-control" 
@@ -66,7 +66,7 @@ include_once("Hostel.php");
                         </select>
                     </div>
                 </div>
-        </form>
+            </form>
                 <hr>
                 <div id="results"></div>
             <?php 

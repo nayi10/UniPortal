@@ -62,13 +62,12 @@ if(isset($_REQUEST['comment']) && !empty($_REQUEST['comment'])){
     $sender = strip_tags($_REQUEST['sender']);
     $receiver = strip_tags($_REQUEST['receiver']);
     
-    $today = date("Y-m-d");
-    $now = date("H:i:sa");
+    $today = date("Y-m-d H:i:sa");
     $status = "unviewed";
     $conn = get_connection_handle();
     $stmt = $conn->prepare("insert into chats(sender,receiver,message,status,
-        added_on,added_at) values(?,?,?,?,?,?)");
-    $stmt->bind_param("ssssss", $sender,$receiver,$msg,$status,$today,$now);
+        added_on) values(?,?,?,?,?)");
+    $stmt->bind_param("sssss", $sender,$receiver,$msg,$status,$today);
     $stmt->execute();
     if($conn->affected_rows == 1){
         echo "Chat has been added";
@@ -93,7 +92,6 @@ if(isset($_REQUEST['comment']) && !empty($_REQUEST['comment'])){
           $ans->insert_votes($username, null, $vote);
         }  
     }
-    
 }elseif(isset($_REQUEST['vote-type']) && $_REQUEST['type'] == "question"){
     include_once("User.php");
     include_once("Question.php");
@@ -234,5 +232,61 @@ if(isset($_REQUEST['comment']) && !empty($_REQUEST['comment'])){
         foreach($errors as $error){
             echo($error."<br>");
         }
+    }
+}elseif(isset($_POST['user_id'])){
+    $errors = array();
+    $msg = "";
+    if(!is_post("user_id")){
+        $errors[] = 'Your ID is required';
+    } else{
+        $user_id = strip_tags(trim(htmlspecialchars($_POST['user_id'])));
+    }
+    if(!is_post("password")){
+        $errors[] = 'Password is required';
+    }else{
+        $password = strip_tags(trim(htmlspecialchars($_POST['password'])));
+    }
+    if(!$errors){
+        $conn = get_connection_handle();
+        $query = $conn->query("SELECT * FROM users WHERE user_id = '$user_id' or username = '$user_id'");
+        $qry = $conn->query("SELECT * FROM admins WHERE username = '$user_id'");
+        if($query->num_rows == 1){
+            $r = $query->fetch_assoc();
+            if(password_verify($password, $r['password'])){
+                if(!session_id())
+                    session_start();
+                $_SESSION["user_id"] = $user_id;
+                $_SESSION['user_type'] = "Normal";
+                $_SESSION["username"] = $r['username'];
+                $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
+                $_SESSION['email'] = $r['email'];
+                $_SESSION['id'] = $r['id'];
+                echo "Login successful";
+            }else{
+                $msg = "Invalid ID and/or password";
+                echo $msg;
+            }
+        }elseif($qry->num_rows == 1){
+            $r = $qry->fetch_assoc();
+            if(password_verify($password, $r['password'])){
+                if(!session_id())
+                    session_start();
+                $_SESSION["user_type"] = "Admin";
+                $_SESSION["username"] = $r['username'];
+                $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
+                $_SESSION['email'] = $r['email'];
+                $_SESSION['id'] = $r['id'];
+                echo "Login successful";
+            }else{
+                $msg = "Invalid ID and/or password";
+                echo $msg;
+            }
+        }else{
+            $msg = "Invalid ID and/or password";
+            echo $msg;
+        }
+    }else{
+        $msg = implode("<br>", $errors);
+        echo $msg;
     }
 }

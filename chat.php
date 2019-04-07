@@ -73,7 +73,7 @@ LT;
 									}
 
 									$result = $conn->query("select added_on, added_at from chats where 
-											sender = receiver = '$row->receiver' 
+											receiver = '$row->receiver' 
 											order by id desc limit 1");
 									$r = $result->fetch_object();
 									$tl = <<<REM
@@ -111,7 +111,7 @@ REM;
 								$f = file_exists($dir)? $dir: "images/picture.png";
 								$img = "<img src='$f' class='rounded-img user_img'>";
 							}else{
-								$uname = "Choose person to chat with";
+								$uname = "";
 								$img = "";
 							}
 							?>
@@ -119,7 +119,7 @@ REM;
 									<?php echo $img; ?>
 								</div>
 								<div class="user_info">
-                                    <span><?php echo $uname;?></span>
+                                    <span><?php echo $uname == ""? "Choose someone to chat": $uname;?></span>
                                     <span class="online_status"></span>
 								</div>
 							</div>

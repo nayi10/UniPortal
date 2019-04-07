@@ -142,4 +142,63 @@ if(isset($_REQUEST['title']) && isset($_REQUEST['organizer'])){
             echo $error."\n";
         }
     }
+}elseif(isset($_REQUEST['userID']) && isset($_REQUEST['username'])){
+    $error = array();
+    if($_REQUEST['userID'] !== ""){
+        $id = $_REQUEST['userID'];
+    }else{
+        $error[] = "An error occured, try again";
+    }
+    if(is_post("username")){
+        $username = strip_tags($_REQUEST['username']);
+    }else{
+        $error[] = "Please provide your username";
+    }
+    if(is_post("email")){
+        $email = strip_tags($_REQUEST['email']);
+    }else{
+        $error[] = "Email is required";
+    }
+    if(is_post("phone")){
+        $phone = strip_tags($_REQUEST['phone']);
+    }else{
+        $error[] = "Provide a phone number";
+    }
+    if(is_post("age")){
+        $age = $_REQUEST['age'];
+    }
+    if(is_post("gender")){
+        $gender = strip_tags($_REQUEST['gender']);
+    }
+    if(is_post("hostel")){
+        $hostel = strip_tags($_REQUEST['hostel']);
+    }
+    if(is_post("country")){
+        $country = strip_tags($_REQUEST['country']);
+    }
+    if(is_post("town")){
+        $town = strip_tags($_REQUEST['town']);
+    }
+    if(is_post("region")){
+        $region = strip_tags($_REQUEST['region']);
+    }
+
+    if(!$error){
+        $conn = get_connection_handle();
+        $stmt = $conn->prepare("update users set username = ?, email = ?, phone = ?,
+        age = ?, gender = ?, hostel = ?, nationality = ?, town = ?, region = ? where id = ?");
+        echo $conn->error;
+        $stmt->bind_param("sssisssssi", $username,$email,$phone,$age, $gender,$hostel,$country,
+        $town, $region, $id);
+        $stmt->execute();
+        if($conn->affected_rows == 1){
+            echo "Update successful";
+        }else{
+            echo "Couldn't update your details";
+        }
+    }else{
+        foreach($error as $err){
+            echo $err.'<br>';
+        }
+    }
 }

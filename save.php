@@ -369,4 +369,59 @@ if(isset($_POST['note'])){
             echo $error."\n";
         }
     }
+}elseif(isset($_REQUEST['tags']) && isset($_REQUEST['question'])){
+    $error = array();
+    if(is_post("question")){
+        $question = strip_tags($_REQUEST['question']);
+    }else{
+        $error[] = "You must enter your question";
+    }
+    if(is_post("description")){
+        $desc = $_REQUEST['description'];
+    }else{
+        $error[] = "Enter question details";
+    }
+    if(is_post("username")){
+        $username = strip_tags($_REQUEST['username']);
+    }else{
+        $error[] = "An error occured. Try again";
+    }
+    if(isset($_REQUEST['tags'])){
+        $t = strip_tags($_REQUEST['tags']);
+        $tg = explode(",", $t);
+        $tgs = array();
+        for($i = 0; $i < count($tg) - 1; $i++){
+            $tgs[] = $tg[$i];
+        }
+        $tags = implode(",", $tgs);
+    }else{
+        $tags = "";
+    }
+    if($tags !== ""){
+        $realtags = explode(",", $tags);
+        foreach($realtags as $tag){
+            $tag = strtolower($tag);
+            if(!file_exists("questions/tags/$tag")){
+                mkdir("questions/tags/$tag", 0777, true);
+                copy("tag.php", "questions/tags/$tag/index.php");
+            }
+        }
+    }
+    $added = date("Y-m-d h:i:sa");
+    if(!$error){
+        $conn = get_connection_handle();
+        $stmt = $conn->prepare("insert into questions(question, description, asked_by,
+        tags, added_on) values(?,?,?,?,?)");
+        $stmt->bind_param("sssss", $question, $desc, $username, $tags, $added);
+        $stmt->execute();
+        if($conn->affected_rows == 1){
+            echo "Saved successful";
+        }else{
+            echo "Problem adding question";
+        }
+    }else{
+        foreach($error as $eror){
+            echo $eror."<br>";
+        }
+    }
 }

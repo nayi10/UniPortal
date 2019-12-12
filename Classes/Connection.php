@@ -7,8 +7,8 @@
  * @author Alhassan Kamil
  */
 class Connection {
-    private $user = 'nayi10';
-    private $password = 'nayi52645';
+    private $user = 'root';
+    private $password = '';
     private $db = 'uniportal';
     private $host = 'localhost';
 
